@@ -1,0 +1,42 @@
+{% extends "admin/base.html" %}
+{% block title %}{{ action }} Faculty{% endblock %}
+{% block content %}
+<div class="mb-4">
+  <a href="{{ url_for('admin_faculty') }}" class="text-muted text-decoration-none">← Faculty</a>
+  <h4 class="fw-bold mt-1">{{ action }} Faculty Member</h4>
+</div>
+<div class="card p-4" style="max-width:600px">
+  <form method="POST">
+    <div class="mb-3">
+      <label class="form-label fw-semibold">Full Name *</label>
+      <input name="name" class="form-control" value="{{ member.name if member else '' }}" required/>
+    </div>
+    <div class="mb-3">
+      <label class="form-label fw-semibold">Qualification</label>
+      <input name="qualification" class="form-control" placeholder="Ph.D. in Physics"
+             value="{{ member.qualification if member else '' }}"/>
+    </div>
+    <div class="mb-3">
+      <label class="form-label fw-semibold">Subject</label>
+      <input name="subject" class="form-control" placeholder="Physics"
+             value="{{ member.subject if member else '' }}"/>
+    </div>
+    <div class="mb-3">
+      <label class="form-label fw-semibold">Experience</label>
+      <input name="experience" class="form-control" placeholder="10+ Years"
+             value="{{ member.experience if member else '' }}"/>
+    </div>
+    {% if member %}
+    <div class="form-check mb-3">
+      <input class="form-check-input" type="checkbox" name="is_active" id="isActive"
+             {{ 'checked' if member.is_active }}>
+      <label class="form-check-label" for="isActive">Active (visible on website)</label>
+    </div>
+    {% endif %}
+    <div class="d-flex gap-2">
+      <button type="submit" class="btn btn-primary">{{ action }} Member</button>
+      <a href="{{ url_for('admin_faculty') }}" class="btn btn-outline-secondary">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

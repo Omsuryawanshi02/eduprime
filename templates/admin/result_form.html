@@ -1,0 +1,50 @@
+{% extends "admin/base.html" %}
+{% block title %}{{ action }} Result{% endblock %}
+{% block content %}
+<div class="mb-4">
+  <a href="{{ url_for('admin_results') }}" class="text-muted text-decoration-none">← Results</a>
+  <h4 class="fw-bold mt-1">{{ action }} Result</h4>
+</div>
+<div class="card p-4" style="max-width:600px">
+  <form method="POST">
+    <div class="mb-3">
+      <label class="form-label fw-semibold">Student Name *</label>
+      <input name="student_name" class="form-control"
+             value="{{ result.student_name if result else '' }}" required/>
+    </div>
+    <div class="mb-3">
+      <label class="form-label fw-semibold">Exam</label>
+      <input name="exam" class="form-control" placeholder="JEE Advanced 2024"
+             value="{{ result.exam if result else '' }}"/>
+    </div>
+    <div class="row g-3 mb-3">
+      <div class="col">
+        <label class="form-label fw-semibold">Score</label>
+        <input name="score" class="form-control" placeholder="99.8 Percentile"
+               value="{{ result.score if result else '' }}"/>
+      </div>
+      <div class="col">
+        <label class="form-label fw-semibold">Rank / Award</label>
+        <input name="rank" class="form-control" placeholder="AIR 15"
+               value="{{ result.rank if result else '' }}"/>
+      </div>
+    </div>
+    <div class="mb-3">
+      <label class="form-label fw-semibold">Year</label>
+      <input name="year" type="number" class="form-control"
+             value="{{ result.year if result else 2024 }}"/>
+    </div>
+    {% if result %}
+    <div class="form-check mb-3">
+      <input class="form-check-input" type="checkbox" name="is_active" id="isActive"
+             {{ 'checked' if result.is_active }}>
+      <label class="form-check-label" for="isActive">Active (visible on website)</label>
+    </div>
+    {% endif %}
+    <div class="d-flex gap-2">
+      <button type="submit" class="btn btn-primary">{{ action }} Result</button>
+      <a href="{{ url_for('admin_results') }}" class="btn btn-outline-secondary">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

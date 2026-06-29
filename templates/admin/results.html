@@ -1,0 +1,38 @@
+{% extends "admin/base.html" %}
+{% block title %}Results{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h4 class="fw-bold mb-0">Hall of Fame – Results</h4>
+  <a href="{{ url_for('add_result') }}" class="btn btn-primary btn-sm">+ Add Result</a>
+</div>
+<div class="card p-0 overflow-hidden">
+  <table class="table table-hover align-middle mb-0">
+    <thead class="table-light">
+      <tr><th>#</th><th>Student</th><th>Exam</th><th>Score</th><th>Rank/Award</th><th>Year</th><th>Active</th><th>Actions</th></tr>
+    </thead>
+    <tbody>
+      {% for r in results %}
+      <tr>
+        <td class="text-muted">{{ r.id }}</td>
+        <td class="fw-semibold">{{ r.student_name }}</td>
+        <td>{{ r.exam }}</td>
+        <td>{{ r.score }}</td>
+        <td>{{ r.rank }}</td>
+        <td>{{ r.year }}</td>
+        <td><span class="badge {{ 'bg-success' if r.is_active else 'bg-secondary' }}">
+          {{ 'Active' if r.is_active else 'Hidden' }}</span></td>
+        <td class="d-flex gap-2">
+          <a href="{{ url_for('edit_result', result_id=r.id) }}" class="btn btn-sm btn-outline-primary">Edit</a>
+          <form method="POST" action="{{ url_for('delete_result', result_id=r.id) }}"
+                onsubmit="return confirm('Delete?')">
+            <button class="btn btn-sm btn-outline-danger">Delete</button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="8" class="text-center text-muted py-5">No results yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

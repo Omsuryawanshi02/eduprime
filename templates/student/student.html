@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Attendance | {{ student.name }} – EduPrime Admin</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Montserrat:wght@100..900&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "on-primary-fixed": "#3B0764",
+            "inverse-on-surface": "#eff1f3",
+            "inverse-primary": "#D8B4FE",
+            "tertiary-fixed": "#ffdbcd",
+            "on-surface": "#191c1e",
+            "surface-variant": "#e0e3e5",
+            "tertiary-fixed-dim": "#ffb596",
+            "secondary-fixed": "#e2e2e2",
+            "secondary-container": "#dfe0e0",
+            "secondary-fixed-dim": "#c6c6c7",
+            "on-secondary-fixed": "#1a1c1c",
+            "background": "#f7f9fb",
+            "secondary": "#5d5f5f",
+            "surface-container-highest": "#e0e3e5",
+            "on-tertiary-fixed-variant": "#7d2d00",
+            "on-secondary": "#ffffff",
+            "outline": "#737686",
+            "on-error-container": "#93000a",
+            "on-secondary-container": "#616363",
+            "surface-dim": "#d8dadc",
+            "primary-fixed-dim": "#D8B4FE",
+            "on-primary-fixed-variant": "#6D28D9",
+            "surface-tint": "#7C3AED",
+            "surface-container": "#eceef0",
+            "outline-variant": "#c3c6d7",
+            "on-tertiary-container": "#ffede6",
+            "surface-container-lowest": "#ffffff",
+            "tertiary-container": "#bc4800",
+            "on-tertiary-fixed": "#360f00",
+            "error-container": "#ffdad6",
+            "primary-fixed": "#EDE9FE",
+            "on-tertiary": "#ffffff",
+            "surface": "#f7f9fb",
+            "inverse-surface": "#2d3133",
+            "on-primary-container": "#eeefff",
+            "surface-bright": "#f7f9fb",
+            "error": "#ba1a1a",
+            "on-background": "#191c1e",
+            "on-surface-variant": "#434655",
+            "surface-container-high": "#e6e8ea",
+            "surface-container-low": "#f2f4f6",
+            "primary": "#7C3AED",
+            "on-primary": "#ffffff",
+            "primary-container": "#A855F7",
+            "on-secondary-fixed-variant": "#454747",
+            "on-error": "#ffffff",
+            "tertiary": "#943700"
+          },
+          borderRadius: {
+            DEFAULT: "0.25rem", lg: "0.5rem", xl: "0.75rem", full: "9999px"
+          },
+          spacing: {
+            gutter: "24px", unit: "4px",
+            "margin-desktop": "40px", "margin-mobile": "16px",
+            "section-gap": "80px", "container-max": "1280px"
+          },
+          fontFamily: {
+            "body-md": ["Inter"], "headline-md": ["Montserrat"],
+            "display-lg": ["Montserrat"], "label-md": ["Inter"],
+            "headline-sm": ["Montserrat"], "body-lg": ["Inter"]
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+    }
+    .custom-shadow { box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .custom-shadow-hover:hover {
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+      transform: translateY(-4px);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface font-body-md">
+
+<!-- ── Top Nav Bar ─────────────────────────────────────────────────────────── -->
+<header class="sticky top-0 w-full h-[80px] z-50 flex items-center justify-between px-margin-desktop max-w-container-max mx-auto bg-surface border-b border-outline-variant shadow-sm">
+  <div class="flex items-center gap-8">
+    <a href="{{ url_for('admin_dashboard') }}" class="text-headline-sm font-headline-sm font-bold text-primary">
+      🎓 EduPrime Admin
+    </a>
+    <nav class="hidden md:flex gap-6">
+      <a class="text-secondary font-label-md hover:text-primary transition-colors duration-300"
+         href="{{ url_for('admin_dashboard') }}">Dashboard</a>
+      <a class="text-secondary font-label-md hover:text-primary transition-colors duration-300"
+         href="{{ url_for('admin_courses') }}">Courses</a>
+      <a class="text-primary font-bold border-b-2 border-tertiary pb-1"
+         href="{{ url_for('admin_students') }}">Students</a>
+      <a class="text-secondary font-label-md hover:text-primary transition-colors duration-300"
+         href="{{ url_for('admin_results') }}">Results</a>
+      <a class="text-secondary font-label-md hover:text-primary transition-colors duration-300"
+         href="{{ url_for('admin_faculty') }}">Faculty</a>
+    </nav>
+  </div>
+  <div class="flex items-center gap-4">
+    <a href="{{ url_for('admin_logout') }}"
+       class="hidden md:block bg-primary text-on-primary px-6 py-2 rounded-lg font-label-md hover:bg-primary-container transition-all active:scale-95">
+      Logout
+    </a>
+  </div>
+</header>
+
+<!-- ── Flash Messages ──────────────────────────────────────────────────────── -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% for cat, msg in messages %}
+    <div class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop mt-4">
+      <div class="px-4 py-3 rounded-lg text-sm font-label-md
+        {{ 'bg-green-100 text-green-800 border border-green-200' if cat == 'success' else 'bg-primary-fixed text-primary border border-primary-fixed-dim' }}">
+        {{ msg }}
+      </div>
+    </div>
+  {% endfor %}
+{% endwith %}
+
+<!-- ── Main Content ────────────────────────────────────────────────────────── -->
+<main class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-10 space-y-8">
+
+  <!-- Breadcrumb -->
+  <nav class="flex items-center gap-2 text-label-md text-on-surface-variant">
+    <a href="{{ url_for('admin_dashboard') }}" class="hover:text-primary transition-colors">Dashboard</a>
+    <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+    <a href="{{ url_for('admin_students') }}" class="hover:text-primary transition-colors">Students</a>
+    <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+    <span class="text-primary font-bold">{{ student.name }}</span>
+  </nav>
+
+  <!-- ── Student Profile Header ────────────────────────────────────────────── -->
+  <section class="bg-surface-container-lowest rounded-xl p-6 custom-shadow flex flex-col md:flex-row justify-between items-center gap-6 border border-outline-variant">
+    <div class="flex items-center gap-6">
+      <!-- Avatar with initials -->
+      <div class="relative">
+        <div class="w-20 h-20 rounded-full flex items-center justify-center border-4 border-primary-fixed bg-primary text-on-primary text-2xl font-bold font-headline-md">
+          {{ student.name[0].upper() }}
+        </div>
+        <span class="absolute bottom-0 right-0 w-6 h-6 bg-green-500 border-2 border-white rounded-full"></span>
+      </div>
+      <div>
+        <h1 class="font-headline-md text-headline-md text-on-surface">{{ student.name }}</h1>
+        <p class="font-body-md text-on-surface-variant flex items-center gap-2 mt-1">
+          <span class="material-symbols-outlined text-primary text-[20px]">school</span>
+          {{ student.grade or 'General Batch' }} &bull; ID: {{ student.student_id }}
+        </p>
+        <p class="font-body-md text-on-surface-variant flex items-center gap-2 mt-1">
+          <span class="material-symbols-outlined text-secondary text-[18px]">mail</span>
+          {{ student.email }}
+        </p>
+      </div>
+    </div>
+
+    <!-- Attendance % + Actions -->
+    <div class="flex items-center gap-8 text-center">
+      <div class="p-4 bg-primary-fixed/20 rounded-xl">
+        <div class="text-display-lg text-primary font-display-lg font-bold">{{ summary.percentage }}%</div>
+        <div class="text-label-md text-primary font-bold uppercase tracking-wider">Attendance</div>
+      </div>
+      <div class="flex flex-col gap-3">
+        <!-- Month navigation -->
+        {% set prev_month = selected_month - 1 if selected_month > 1 else 12 %}
+        {% set prev_year  = selected_year if selected_month > 1 else selected_year - 1 %}
+        {% set next_month = selected_month + 1 if selected_month < 12 else 1 %}
+        {% set next_year  = selected_year if selected_month < 12 else selected_year + 1 %}
+        <div class="flex gap-2">
+          <a href="{{ url_for('admin_student_attendance', student_id=student.id, year=prev_year, month=prev_month) }}"
+             class="bg-surface-container-low border border-outline-variant text-secondary px-4 py-2 rounded-lg font-label-md flex items-center gap-1 hover:border-primary hover:text-primary transition-all">
+            <span class="material-symbols-outlined text-[18px]">chevron_left</span> Prev
+          </a>
+          <a href="{{ url_for('admin_student_attendance', student_id=student.id, year=next_year, month=next_month) }}"
+             class="bg-surface-container-low border border-outline-variant text-secondary px-4 py-2 rounded-lg font-label-md flex items-center gap-1 hover:border-primary hover:text-primary transition-all">
+            Next <span class="material-symbols-outlined text-[18px]">chevron_right</span>
+          </a>
+        </div>
+        <a href="{{ url_for('admin_mark_attendance') }}"
+           class="bg-primary text-on-primary px-6 py-3 rounded-lg font-label-md flex items-center gap-2 hover:bg-primary-container transition-all shadow-md active:scale-95 justify-center">
+          <span class="material-symbols-outlined">edit_calendar</span>
+          Mark Attendance
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Stats Grid ─────────────────────────────────────────────────────────── -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter">
+
+    <!-- Total Sessions -->
+    <div class="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant custom-shadow custom-shadow-hover">
+      <div class="flex justify-between items-start mb-4">
+        <div class="p-3 bg-secondary-container rounded-lg">
+          <span class="material-symbols-outlined text-secondary">analytics</span>
+        </div>
+        <span class="text-label-md font-bold text-secondary bg-surface-container px-2 py-1 rounded">
+          {{ selected_month }}/{{ selected_year }}
+        </span>
+      </div>
+      <h3 class="font-label-md text-on-surface-variant mb-1">Total Sessions</h3>
+      <div class="font-headline-md text-headline-md text-on-surface">{{ summary.total }}</div>
+    </div>
+
+    <!-- Days Present -->
+    <div class="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant custom-shadow custom-shadow-hover">
+      <div class="flex justify-between items-start mb-4">
+        <div class="p-3 bg-primary-fixed/30 rounded-lg">
+          <span class="material-symbols-outlined text-primary">check_circle</span>
+        </div>
+        <span class="text-label-md font-bold text-primary bg-primary-fixed/10 px-2 py-1 rounded">
+          {{ 'On Track' if summary.percentage >= 75 else 'Low' }}
+        </span>
+      </div>
+      <h3 class="font-label-md text-on-surface-variant mb-1">Days Present</h3>
+      <div class="font-headline-md text-headline-md text-on-surface">{{ summary.present }}</div>
+    </div>
+
+    <!-- Days Absent -->
+    <div class="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant custom-shadow custom-shadow-hover">
+      <div class="flex justify-between items-start mb-4">
+        <div class="p-3 bg-error-container/30 rounded-lg">
+          <span class="material-symbols-outlined text-error">cancel</span>
+        </div>
+        <span class="text-label-md font-bold text-error bg-error-container/10 px-2 py-1 rounded">
+          {{ 'Needs Review' if summary.absent > 3 else 'Good' }}
+        </span>
+      </div>
+      <h3 class="font-label-md text-on-surface-variant mb-1">Days Absent</h3>
+      <div class="font-headline-md text-headline-md text-on-surface">{{ summary.absent }}</div>
+    </div>
+
+    <!-- Late Arrivals -->
+    <div class="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant custom-shadow custom-shadow-hover">
+      <div class="flex justify-between items-start mb-4">
+        <div class="p-3 bg-tertiary-fixed/30 rounded-lg">
+          <span class="material-symbols-outlined text-tertiary">schedule</span>
+        </div>
+        <span class="text-label-md font-bold text-tertiary bg-tertiary-fixed/10 px-2 py-1 rounded">
+          {{ 'Caution' if summary.late > 2 else 'Good' }}
+        </span>
+      </div>
+      <h3 class="font-label-md text-on-surface-variant mb-1">Late Arrivals</h3>
+      <div class="font-headline-md text-headline-md text-on-surface">{{ summary.late }}</div>
+    </div>
+
+  </div>
+
+  <!-- ── Calendar + Log ─────────────────────────────────────────────────────── -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-gutter">
+
+    <!-- Monthly Attendance Calendar -->
+    <section class="lg:col-span-1 bg-surface-container-lowest rounded-xl p-6 border border-outline-variant custom-shadow flex flex-col">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="font-headline-sm text-headline-sm text-on-surface">
+          {{ ['', 'January','February','March','April','May','June',
+              'July','August','September','October','November','December'][selected_month] }}
+          {{ selected_year }}
+        </h2>
+        <div class="flex gap-2">
+          <a href="{{ url_for('admin_student_attendance', student_id=student.id, year=prev_year, month=prev_month) }}"
+             class="p-2 hover:bg-surface-container rounded-full transition-colors">
+            <span class="material-symbols-outlined">chevron_left</span>
+          </a>
+          <a href="{{ url_for('admin_student_attendance', student_id=student.id, year=next_year, month=next_month) }}"
+             class="p-2 hover:bg-surface-container rounded-full transition-colors">
+            <span class="material-symbols-outlined">chevron_right</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Day-of-week headers -->
+      <div class="calendar-grid text-center mb-2 border-b border-outline-variant pb-2">
+        {% for d in ['Su','Mo','Tu','We','Th','Fr','Sa'] %}
+          <div class="font-label-md text-on-surface-variant">{{ d }}</div>
+        {% endfor %}
+      </div>
+
+      <!-- Calendar grid -->
+      <div class="calendar-grid flex-grow gap-y-2">
+        <!-- Blank cells for the day-of-week offset of the 1st -->
+        {% for _ in range(first_weekday) %}
+          <div class="p-2"></div>
+        {% endfor %}
+
+        {% for day in range(1, days_in_month + 1) %}
+          {% set day_str = '%04d-%02d-%02d' | format(selected_year, selected_month, day) %}
+          {% set rec = records_by_date.get(day_str) %}
+          <div class="p-2 group cursor-pointer relative">
+            <div class="w-10 h-10 flex flex-col items-center justify-center rounded-lg hover:bg-primary-fixed/20 transition-colors mx-auto
+              {% if day == today_day %}bg-primary text-white font-bold{% endif %}">
+              <span class="text-body-md">{{ day }}</span>
+              {% if rec %}
+                {% if rec.status == 'present' %}
+                  <div class="w-1.5 h-1.5 rounded-full bg-green-500 mx-auto mt-1"></div>
+                {% elif rec.status == 'late' %}
+                  <div class="w-1.5 h-1.5 rounded-full bg-orange-500 mx-auto mt-1"></div>
+                {% elif rec.status == 'absent' %}
+                  <div class="w-1.5 h-1.5 rounded-full bg-red-500 mx-auto mt-1"></div>
+                {% endif %}
+              {% endif %}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+
+      <!-- Legend -->
+      <div class="mt-6 pt-6 border-t border-outline-variant">
+        <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-label-md text-on-surface-variant">
+          <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-green-500 inline-block"></span> Present</span>
+          <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-orange-500 inline-block"></span> Late</span>
+          <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-red-500 inline-block"></span> Absent</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Attendance Log Table -->
+    <section class="lg:col-span-2 bg-surface-container-lowest rounded-xl border border-outline-variant custom-shadow overflow-hidden">
+      <div class="p-6 border-b border-outline-variant flex items-center justify-between">
+        <h2 class="font-headline-sm text-headline-sm text-on-surface">Attendance Log</h2>
+        <span class="text-label-md text-on-surface-variant">
+          {{ ['', 'Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][selected_month] }}
+          {{ selected_year }}
+        </span>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead class="bg-surface-container-low text-label-md text-secondary font-bold uppercase tracking-wider">
+            <tr>
+              <th class="px-6 py-4">Date</th>
+              <th class="px-6 py-4">Status</th>
+              <th class="px-6 py-4">Marked By</th>
+              <th class="px-6 py-4">Note / Remarks</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-outline-variant">
+            {% for rec in records %}
+            <tr class="hover:bg-surface-container-low transition-colors">
+              <td class="px-6 py-4 text-body-md font-bold">{{ rec.date.strftime('%b %d, %Y') }}</td>
+              <td class="px-6 py-4">
+                {% if rec.status == 'present' %}
+                  <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-100 text-green-700 text-label-md font-bold">
+                    <span class="w-1.5 h-1.5 rounded-full bg-green-700"></span> Present
+                  </span>
+                {% elif rec.status == 'late' %}
+                  <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-100 text-orange-700 text-label-md font-bold">
+                    <span class="w-1.5 h-1.5 rounded-full bg-orange-700"></span> Late
+                  </span>
+                {% else %}
+                  <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-100 text-red-700 text-label-md font-bold">
+                    <span class="w-1.5 h-1.5 rounded-full bg-red-700"></span> Absent
+                  </span>
+                {% endif %}
+              </td>
+              <td class="px-6 py-4 text-body-md text-on-surface-variant capitalize">{{ rec.marked_by or '—' }}</td>
+              <td class="px-6 py-4 text-body-md text-on-surface-variant italic">{{ rec.note or '—' }}</td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="4" class="px-6 py-12 text-center text-on-surface-variant font-body-md">
+                <span class="material-symbols-outlined text-4xl block mb-2 mx-auto text-secondary-container">event_busy</span>
+                No attendance records for this month.
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="p-6 bg-surface-container-low flex justify-between items-center">
+        <span class="text-label-md text-on-surface-variant">
+          {{ records | length }} record{{ 's' if records | length != 1 else '' }} this month
+        </span>
+        <a href="{{ url_for('admin_mark_attendance') }}"
+           class="text-primary font-bold font-label-md hover:underline flex items-center gap-1">
+          <span class="material-symbols-outlined text-[18px]">add</span> Add / Edit Records
+        </a>
+      </div>
+    </section>
+  </div>
+
+  <!-- ── Bento Cards ─────────────────────────────────────────────────────────── -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-gutter">
+
+    <!-- Monthly History -->
+    <div class="bg-surface-container-lowest rounded-xl border border-outline-variant custom-shadow p-6">
+      <h3 class="font-headline-sm text-headline-sm text-on-surface mb-4">6-Month History</h3>
+      <div class="space-y-3">
+        {% for ms in monthly_summaries %}
+        <div class="flex items-center gap-3">
+          <span class="text-label-md text-on-surface-variant w-24 shrink-0">
+            {{ ['', 'Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][ms.month] }}
+            {{ ms.year }}
+          </span>
+          <div class="flex-1 bg-surface-container rounded-full h-2">
+            <div class="h-2 rounded-full
+              {% if ms.percentage >= 75 %}bg-green-500
+              {% elif ms.percentage >= 50 %}bg-orange-400
+              {% else %}bg-red-500{% endif %}"
+              style="width: {{ ms.percentage }}%">
+            </div>
+          </div>
+          <span class="text-label-md font-bold w-12 text-right
+            {% if ms.percentage >= 75 %}text-green-700
+            {% elif ms.percentage >= 50 %}text-orange-600
+            {% else %}text-red-600{% endif %}">
+            {{ ms.percentage }}%
+          </span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Status Card: Good or Needs Attention -->
+    {% if summary.percentage >= 75 %}
+    <div class="bg-gradient-to-br from-primary to-blue-700 p-8 rounded-xl text-white flex items-center justify-between shadow-lg overflow-hidden relative group">
+      <div class="z-10 relative">
+        <h3 class="font-headline-sm text-headline-sm mb-2">Great Attendance!</h3>
+        <p class="font-body-md mb-6 opacity-90 max-w-sm">
+          {{ student.name }} has maintained {{ summary.percentage }}% attendance this month. Keep it up!
+        </p>
+        <a href="{{ url_for('admin_mark_attendance') }}"
+           class="bg-white text-primary px-8 py-3 rounded-lg font-bold hover:bg-opacity-90 transition-all flex items-center gap-2 w-fit">
+          Mark Today's Attendance
+          <span class="material-symbols-outlined">arrow_forward</span>
+        </a>
+      </div>
+      <div class="absolute -right-10 -bottom-10 opacity-20 group-hover:scale-110 transition-transform duration-500">
+        <span class="material-symbols-outlined text-[200px]" style="font-variation-settings: 'FILL' 1;">emoji_events</span>
+      </div>
+    </div>
+    {% else %}
+    <div class="bg-gradient-to-br from-error to-red-700 p-8 rounded-xl text-white flex items-center justify-between shadow-lg overflow-hidden relative group">
+      <div class="z-10 relative">
+        <h3 class="font-headline-sm text-headline-sm mb-2">Attendance Below 75%</h3>
+        <p class="font-body-md mb-6 opacity-90 max-w-sm">
+          {{ student.name }}'s attendance is at {{ summary.percentage }}% this month.
+          {{ summary.absent }} absence{{ 's' if summary.absent != 1 else '' }} recorded. Action may be needed.
+        </p>
+        <a href="{{ url_for('admin_mark_attendance') }}"
+           class="bg-white text-error px-8 py-3 rounded-lg font-bold hover:bg-opacity-90 transition-all flex items-center gap-2 w-fit">
+          Review & Update
+          <span class="material-symbols-outlined">arrow_forward</span>
+        </a>
+      </div>
+      <div class="absolute -right-10 -bottom-10 opacity-20 group-hover:scale-110 transition-transform duration-500">
+        <span class="material-symbols-outlined text-[200px]" style="font-variation-settings: 'FILL' 1;">warning</span>
+      </div>
+    </div>
+    {% endif %}
+
+  </div>
+
+</main>
+
+<!-- ── Footer ──────────────────────────────────────────────────────────────── -->
+<footer class="w-full py-8 px-margin-desktop flex flex-col md:flex-row justify-between items-center gap-4 bg-surface-container-low border-t border-outline-variant mt-8">
+  <div class="flex flex-col gap-1">
+    <span class="text-label-md font-bold text-on-surface">EduPrime Admin</span>
+    <span class="text-body-md text-on-surface-variant">&copy; {{ selected_year }} EduPrime. All rights reserved.</span>
+  </div>
+  <div class="flex gap-6">
+    <a class="text-on-surface-variant font-label-md hover:text-tertiary transition-colors" href="#">Privacy Policy</a>
+    <a class="text-on-surface-variant font-label-md hover:text-tertiary transition-colors" href="#">Support</a>
+  </div>
+</footer>
+
+</body>
+</html>

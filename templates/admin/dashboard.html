@@ -1,0 +1,61 @@
+{% extends "admin/base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<h4 class="mb-4 fw-bold text-dark">Dashboard</h4>
+
+<div class="row g-4 mb-5">
+  <div class="col-md-3">
+    <div class="stat-card">
+      <div class="text-muted small">Total Inquiries</div>
+      <div class="display-6 fw-bold text-primary">{{ stats.total_inquiries }}</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="stat-card border-start border-4 border-warning">
+      <div class="text-muted small">New / Pending</div>
+      <div class="display-6 fw-bold text-warning">{{ stats.new_inquiries }}</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="stat-card">
+      <div class="text-muted small">Active Courses</div>
+      <div class="display-6 fw-bold text-success">{{ stats.total_courses }}</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="stat-card">
+      <div class="text-muted small">Faculty Members</div>
+      <div class="display-6 fw-bold" style="color:#7C3AED">{{ stats.total_faculty }}</div>
+    </div>
+  </div>
+</div>
+
+<div class="card p-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h6 class="fw-bold mb-0">Recent Inquiries</h6>
+    <a href="{{ url_for('admin_inquiries') }}" class="btn btn-sm btn-primary">View All</a>
+  </div>
+  <table class="table table-hover align-middle mb-0">
+    <thead class="table-light">
+      <tr><th>Student</th><th>Grade</th><th>Parent</th><th>Phone</th><th>Status</th><th>Date</th></tr>
+    </thead>
+    <tbody>
+      {% for i in recent %}
+      <tr>
+        <td class="fw-semibold">{{ i.student_name }}</td>
+        <td>{{ i.grade }}</td>
+        <td>{{ i.parent_name }}</td>
+        <td>{{ i.phone }}</td>
+        <td>
+          <span class="badge badge-{{ i.status }}">{{ i.status|title }}</span>
+        </td>
+        <td class="text-muted small">{{ i.created_at.strftime('%d %b %Y') }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="6" class="text-center text-muted py-4">No inquiries yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

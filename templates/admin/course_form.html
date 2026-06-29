@@ -1,0 +1,48 @@
+{% extends "admin/base.html" %}
+{% block title %}{{ action }} Course{% endblock %}
+{% block content %}
+<div class="mb-4">
+  <a href="{{ url_for('admin_courses') }}" class="text-muted text-decoration-none">← Courses</a>
+  <h4 class="fw-bold mt-1">{{ action }} Course</h4>
+</div>
+<div class="card p-4" style="max-width:600px">
+  <form method="POST">
+    <div class="mb-3">
+      <label class="form-label fw-semibold">Title *</label>
+      <input name="title" class="form-control" value="{{ course.title if course else '' }}" required/>
+    </div>
+    <div class="mb-3">
+      <label class="form-label fw-semibold">Stream / Category *</label>
+      <input name="stream" class="form-control" placeholder="e.g. Science Stream"
+             value="{{ course.stream if course else '' }}" required/>
+    </div>
+    <div class="mb-3">
+      <label class="form-label fw-semibold">Description</label>
+      <textarea name="description" class="form-control" rows="3">{{ course.description if course else '' }}</textarea>
+    </div>
+    <div class="row g-3 mb-3">
+      <div class="col">
+        <label class="form-label fw-semibold">Duration</label>
+        <input name="duration" class="form-control" placeholder="12 Months"
+               value="{{ course.duration if course else '' }}"/>
+      </div>
+      <div class="col">
+        <label class="form-label fw-semibold">Target Students</label>
+        <input name="target" class="form-control" placeholder="Class 11-12"
+               value="{{ course.target if course else '' }}"/>
+      </div>
+    </div>
+    {% if course %}
+    <div class="form-check mb-3">
+      <input class="form-check-input" type="checkbox" name="is_active" id="isActive"
+             {{ 'checked' if course.is_active }}>
+      <label class="form-check-label" for="isActive">Active (visible on website)</label>
+    </div>
+    {% endif %}
+    <div class="d-flex gap-2">
+      <button type="submit" class="btn btn-primary">{{ action }} Course</button>
+      <a href="{{ url_for('admin_courses') }}" class="btn btn-outline-secondary">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

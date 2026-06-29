@@ -1,0 +1,60 @@
+{% extends "admin/base.html" %}
+{% block title %}Inquiries{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h4 class="fw-bold mb-0">Inquiries</h4>
+  <div class="d-flex gap-2">
+    <a href="{{ url_for('admin_inquiries') }}"
+       class="btn btn-sm {{ 'btn-primary' if not status_filter else 'btn-outline-secondary' }}">All</a>
+    <a href="{{ url_for('admin_inquiries', status='new') }}"
+       class="btn btn-sm {{ 'btn-primary' if status_filter=='new' else 'btn-outline-secondary' }}">New</a>
+    <a href="{{ url_for('admin_inquiries', status='contacted') }}"
+       class="btn btn-sm {{ 'btn-primary' if status_filter=='contacted' else 'btn-outline-secondary' }}">Contacted</a>
+    <a href="{{ url_for('admin_inquiries', status='enrolled') }}"
+       class="btn btn-sm {{ 'btn-primary' if status_filter=='enrolled' else 'btn-outline-secondary' }}">Enrolled</a>
+  </div>
+</div>
+
+<div class="card p-0 overflow-hidden">
+  <table class="table table-hover align-middle mb-0">
+    <thead class="table-light">
+      <tr>
+        <th>#</th><th>Student</th><th>Grade</th><th>Parent</th>
+        <th>Phone</th><th>Message</th><th>Status</th><th>Date</th><th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for i in inquiries %}
+      <tr>
+        <td class="text-muted">{{ i.id }}</td>
+        <td class="fw-semibold">{{ i.student_name }}</td>
+        <td>{{ i.grade }}</td>
+        <td>{{ i.parent_name }}</td>
+        <td>{{ i.phone }}</td>
+        <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
+          {{ i.message or '—' }}</td>
+        <td>
+          <form method="POST" action="{{ url_for('update_inquiry_status', inquiry_id=i.id) }}" class="d-inline">
+            <select name="status" class="form-select form-select-sm" onchange="this.form.submit()" style="width:120px">
+              {% for s in ['new','contacted','enrolled'] %}
+              <option value="{{ s }}" {{ 'selected' if i.status==s }}>{{ s|title }}</option>
+              {% endfor %}
+            </select>
+          </form>
+        </td>
+        <td class="text-muted small">{{ i.created_at.strftime('%d %b %Y') }}</td>
+        <td>
+          <form method="POST" action="{{ url_for('delete_inquiry', inquiry_id=i.id) }}"
+                onsubmit="return confirm('Delete this inquiry?')">
+            <button class="btn btn-sm btn-outline-danger">Delete</button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="9" class="text-center text-muted py-5">No inquiries found.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
